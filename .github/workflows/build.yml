@@ -30,11 +30,17 @@ jobs:
     # C# / .NET Solutions (Require "Any CPU")
     # =========================================================
 
+    - name: Build BlockingDLL
+      run: msbuild .\BlockingDLL\BlockingDLL.sln /p:Configuration=Release /p:Platform="Any CPU" /m
+
     - name: Build CloneProcess
       run: msbuild .\CloneProcess\CloneProcess.sln /p:Configuration=Release /p:Platform="Any CPU" /m
 
     - name: Build CommandLineSpoofing
       run: msbuild .\CommandLineSpoofing\CommandLineSpoofing.sln /p:Configuration=Release /p:Platform="Any CPU" /m
+
+    - name: Build DarkLoadLibrary
+      run: msbuild .\DarkLoadLibrary\DarkLoadLibrary.sln /p:Configuration=Release /p:Platform="Any CPU" /m
 
     - name: Build GhostlyHollowing
       run: msbuild .\GhostlyHollowing\GhostlyHollowing.sln /p:Configuration=Release /p:Platform="Any CPU" /m
@@ -48,42 +54,36 @@ jobs:
     - name: Build ProcessDoppelgaenging
       run: msbuild .\ProcessDoppelgaenging\ProcessDoppelgaenging.sln /p:Configuration=Release /p:Platform="Any CPU" /m
 
+    - name: Build ProcessGhosting
+      run: msbuild .\ProcessGhosting\ProcessGhosting.sln /p:Configuration=Release /p:Platform="Any CPU" /m
+
+    - name: Build ProcessHerpaderping
+      run: msbuild .\ProcessHerpaderping\ProcessHerpaderping.sln /p:Configuration=Release /p:Platform="Any CPU" /m
+
+    - name: Build ProcessHollowing
+      run: msbuild .\ProcessHollowing\ProcessHollowing.sln /p:Configuration=Release /p:Platform="Any CPU" /m
+
     - name: Build ProcMemScan
       run: msbuild .\ProcMemScan\ProcMemScan.sln /p:Configuration=Release /p:Platform="Any CPU" /m
+
+    - name: Build ProtectedProcess - SdDumper
+      run: msbuild .\ProtectedProcess\SdDumper\SdDumper.sln /p:Configuration=Release /p:Platform="Any CPU" /m
+
+    - name: Build ReflectiveDLLInjection
+      run: msbuild .\ReflectiveDLLInjection\ReflectiveDLLInjection.sln /p:Configuration=Release /p:Platform="Any CPU" /m
+
+    - name: Build sRDI
+      run: msbuild .\sRDI\sRDI.sln /p:Configuration=Release /p:Platform="Any CPU" /m
+
+    - name: Build TransactedHollowing
+      run: msbuild .\TransactedHollowing\TransactedHollowing.sln /p:Configuration=Release /p:Platform="Any CPU" /m
+
+    - name: Build WmiSpawn
+      run: msbuild .\WmiSpawn\WmiSpawn.sln /p:Configuration=Release /p:Platform="Any CPU" /m
 
     # =========================================================
     # Native & Specific Architecture Solutions (Use x64)
     # =========================================================
 
-    - name: Build BlockingDLL
-      run: msbuild .\BlockingDLL\BlockingDLL.sln /p:Configuration=Release /p:Platform=x64 /m
-
-    - name: Build DarkLoadLibrary
-      run: msbuild .\DarkLoadLibrary\DarkLoadLibrary.sln /p:Configuration=Release /p:Platform=x64 /m
-
-    - name: Build ProcessGhosting
-      run: msbuild .\ProcessGhosting\ProcessGhosting.sln /p:Configuration=Release /p:Platform=x64 /m
-
-    - name: Build ProcessHerpaderping
-      run: msbuild .\ProcessHerpaderping\ProcessHerpaderping.sln /p:Configuration=Release /p:Platform=x64 /m
-
-    - name: Build ProcessHollowing
-      run: msbuild .\ProcessHollowing\ProcessHollowing.sln /p:Configuration=Release /p:Platform=x64 /m
-
     - name: Build ProtectedProcess - PPEditor
       run: msbuild .\ProtectedProcess\PPEditor\PPEditor.sln /p:Configuration=Release /p:Platform=x64 /m
-
-    - name: Build ProtectedProcess - SdDumper
-      run: msbuild .\ProtectedProcess\SdDumper\SdDumper.sln /p:Configuration=Release /p:Platform=x64 /m
-
-    - name: Build ReflectiveDLLInjection
-      run: msbuild .\ReflectiveDLLInjection\ReflectiveDLLInjection.sln /p:Configuration=Release /p:Platform=x64 /m
-
-    - name: Build sRDI
-      run: msbuild .\sRDI\sRDI.sln /p:Configuration=Release /p:Platform=x64 /m
-
-    - name: Build TransactedHollowing
-      run: msbuild .\TransactedHollowing\TransactedHollowing.sln /p:Configuration=Release /p:Platform=x64 /m
-
-    - name: Build WmiSpawn
-      run: msbuild .\WmiSpawn\WmiSpawn.sln /p:Configuration=Release /p:Platform=x64 /m
