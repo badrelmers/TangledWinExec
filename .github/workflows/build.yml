@@ -5,7 +5,7 @@ on:
     branches: [ "main", "master" ]
   pull_request:
     branches: [ "main", "master" ]
-  workflow_dispatch: # Allows manual trigger from the GitHub Actions UI
+  workflow_dispatch:
 
 jobs:
   build:
@@ -18,35 +18,69 @@ jobs:
     - name: Add MSBuild to PATH
       uses: microsoft/setup-msbuild@v2
       with:
-        vs-version: '[17.0,18.0)' # Restricts build environment strictly to VS 2022 / MSBuild 17
+        vs-version: '[17.0,18.0)'
 
     - name: Restore NuGet Packages
       run: |
-        # Recursively find all solutions and restore packages if any project uses NuGet
         Get-ChildItem -Recurse -Filter *.sln | ForEach-Object {
-            Write-Host "Restoring NuGet packages for: $($_.FullName)"
             nuget restore $_.FullName
         }
 
-    - name: Build All Solutions
-      run: |
-        $solutions = Get-ChildItem -Recurse -Filter *.sln
-        
-        if ($solutions.Count -eq 0) {
-            Write-Error "No solution (.sln) files found in the repository!"
-            exit 1
-        }
+    # =========================================================
+    # C# / .NET Solutions (Require "Any CPU")
+    # =========================================================
 
-        foreach ($sln in $solutions) {
-            Write-Host "========================================="
-            Write-Host "Building: $($sln.FullName)"
-            Write-Host "========================================="
-            
-            # Using Release configuration; platform targeted to x64 for Windows internal PoCs
-            msbuild $sln.FullName /p:Configuration=Release /p:Platform=x64 /m
-            
-            if ($LASTEXITCODE -ne 0) {
-                Write-Error "Build failed for solution: $($sln.FullName)"
-                exit $LASTEXITCODE
-            }
-        }
+    - name: Build CloneProcess
+      run: msbuild .\CloneProcess\CloneProcess.sln /p:Configuration=Release /p:Platform="Any CPU" /m
+
+    - name: Build ProcMemScan
+      run: msbuild .\ProcMemScan\ProcMemScan.sln /p:Configuration=Release /p:Platform="Any CPU" /m
+
+    - name: Build ProtectedProcess
+      run: msbuild .\ProtectedProcess\ProtectedProcess.sln /p:Configuration=Release /p:Platform="Any CPU" /m
+
+    # =========================================================
+    # Native / Specific Architecture Solutions (Use x64)
+    # =========================================================
+
+    - name: Build BlockingDLL
+      run: msbuild .\BlockingDLL\BlockingDLL.sln /p:Configuration=Release /p:Platform=x64 /m
+
+    - name: Build CommandLineSpoofing
+      run: msbuild .\CommandLineSpoofing\CommandLineSpoofing.sln /p:Configuration=Release /p:Platform=x64 /m
+
+    - name: Build DarkLoadLibrary
+      run: msbuild .\DarkLoadLibrary\DarkLoadLibrary.sln /p:Configuration=Release /p:Platform=x64 /m
+
+    - name: Build GhostlyHollowing
+      run: msbuild .\GhostlyHollowing\GhostlyHollowing.sln /p:Configuration=Release /p:Platform=x64 /m
+
+    - name: Build PhantomDllHollower
+      run: msbuild .\PhantomDllHollower\PhantomDllHollower.sln /p:Configuration=Release /p:Platform=x64 /m
+
+    - name: Build PPIDSpoofing
+      run: msbuild .\PPIDSpoofing\PPIDSpoofing.sln /p:Configuration=Release /p:Platform=x64 /m
+
+    - name: Build ProcessDoppelgaenging
+      run: msbuild .\ProcessDoppelgaenging\ProcessDoppelgaenging.sln /p:Configuration=Release /p:Platform=x64 /m
+
+    - name: Build ProcessGhosting
+      run: msbuild .\ProcessGhosting\ProcessGhosting.sln /p:Configuration=Release /p:Platform=x64 /m
+
+    - name: Build ProcessHerpaderping
+      run: msbuild .\ProcessHerpaderping\ProcessHerpaderping.sln /p:Configuration=Release /p:Platform=x64 /m
+
+    - name: Build ProcessHollowing
+      run: msbuild .\ProcessHollowing\ProcessHollowing.sln /p:Configuration=Release /p:Platform=x64 /m
+
+    - name: Build ReflectiveDLLInjection
+      run: msbuild .\ReflectiveDLLInjection\ReflectiveDLLInjection.sln /p:Configuration=Release /p:Platform=x64 /m
+
+    - name: Build sRDI
+      run: msbuild .\sRDI\sRDI.sln /p:Configuration=Release /p:Platform=x64 /m
+
+    - name: Build TransactedHollowing
+      run: msbuild .\TransactedHollowing\TransactedHollowing.sln /p:Configuration=Release /p:Platform=x64 /m
+
+    - name: Build WmiSpawn
+      run: msbuild .\WmiSpawn\WmiSpawn.sln /p:Configuration=Release /p:Platform=x64 /m
