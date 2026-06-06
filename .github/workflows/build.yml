@@ -156,11 +156,24 @@ jobs:
             Copy-Item -Path $_.FullName -Destination $targetFile -Force
         }
 
+        # 5. Find and mirror any 'figures' asset folders from the source directories
+        Get-ChildItem -Recurse -Directory -Filter "figures" | Where-Object {
+            $_.FullName -notmatch '\\StagedBinaries\\' -and $_.FullName -notmatch '\\obj\\' -and $_.FullName -notmatch '\\bin\\'
+        } | ForEach-Object {
+            $relativeDir = Resolve-Path -Relative $_.FullName
+            $cleanPath = $relativeDir -replace '^\.\\', ''
+            $targetDir = ".\StagedBinaries\$cleanPath"
+            
+            New-Item -ItemType Directory -Force -Path $targetDir
+            Write-Host "Mirroring figures asset directory: $cleanPath"
+            Copy-Item -Path "$($_.FullName)\*" -Destination $targetDir -Recurse -Force
+        }
+
         Write-Host "======================================================"
         Write-Host "Purging C++ compiler intermediate leftovers & linker residue..."
         Write-Host "======================================================"
         
-        # Target and delete specific MSVC compilation artifacts (added .lib and .exp)
+        # Target and delete specific MSVC compilation artifacts (includes .lib and .exp)
         Get-ChildItem -Path .\StagedBinaries -Recurse -File | Where-Object {
             $_.Extension -in '.pdb', '.ilk', '.recipe', '.iobj', '.ipdb', '.pch', '.obj', '.lib', '.exp'
         } | ForEach-Object {
