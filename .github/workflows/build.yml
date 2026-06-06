@@ -1,0 +1,52 @@
+name: Build All Solutions (VS 2022)
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+  workflow_dispatch: # Allows manual trigger from the GitHub Actions UI
+
+jobs:
+  build:
+    runs-on: windows-2022
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Add MSBuild to PATH
+      uses: microsoft/setup-msbuild@v2
+      with:
+        vs-version: '[17.0,18.0)' # Restricts build environment strictly to VS 2022 / MSBuild 17
+
+    - name: Restore NuGet Packages
+      run: |
+        # Recursively find all solutions and restore packages if any project uses NuGet
+        Get-ChildItem -Recurse -Filter *.sln | ForEach-Object {
+            Write-Host "Restoring NuGet packages for: $($_.FullName)"
+            nuget restore $_.FullName
+        }
+
+    - name: Build All Solutions
+      run: |
+        $solutions = Get-ChildItem -Recurse -Filter *.sln
+        
+        if ($solutions.Count -eq 0) {
+            Write-Error "No solution (.sln) files found in the repository!"
+            exit 1
+        }
+
+        foreach ($sln in $solutions) {
+            Write-Host "========================================="
+            Write-Host "Building: $($sln.FullName)"
+            Write-Host "========================================="
+            
+            # Using Release configuration; platform targeted to x64 for Windows internal PoCs
+            msbuild $sln.FullName /p:Configuration=Release /p:Platform=x64 /m
+            
+            if ($LASTEXITCODE -ne 0) {
+                Write-Error "Build failed for solution: $($sln.FullName)"
+                exit $LASTEXITCODE
+            }
+        }
