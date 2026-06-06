@@ -12,14 +12,6 @@ jobs:
     runs-on: windows-2022
 
     steps:
-    - name: Build all solutions in Misc
-      run: |
-        Get-ChildItem -Path .\Misc -Filter *.sln -Recurse | ForEach-Object {
-            Write-Host "------------------------------------------------------"
-            Write-Host "Building Solution: $($_.FullName)"
-            Write-Host "------------------------------------------------------"
-            & msbuild.exe $_.FullName /p:Configuration=Release /m
-        }
     - name: Checkout Repository
       uses: actions/checkout@v4
 
@@ -97,21 +89,39 @@ jobs:
       run: msbuild .\ProtectedProcess\PPEditor\PPEditor.sln /p:Configuration=Release /p:Platform=x64 /m
 
     # =========================================================
+    # Dynamic Compilation for Misc Folder (Bypasses PEUtils)
+    # =========================================================
+
+    - name: Build all solutions in Misc
+      run: |
+        Get-ChildItem -Path .\Misc -Filter *.sln -Recurse | ForEach-Object {
+            Write-Host "------------------------------------------------------"
+            Write-Host "Building Misc Component: $($_.FullName)"
+            Write-Host "------------------------------------------------------"
+            msbuild $_.FullName /p:Configuration=Release /m
+        }
+
+    # =========================================================
     # Gather and Stage Compiled Artifacts
     # =========================================================
 
     - name: Stage Artifacts for Zipping
       run: |
-        # Create a clean folder to stage everything
+        # Create staging root
         New-Item -ItemType Directory -Force -Path .\StagedBinaries
         
-        # Find all .exe and .dll files recursively within Release output folders
+        # Gather matching compiled .exe and .dll items out of Release outputs
         Get-ChildItem -Recurse -Include *.exe, *.dll | Where-Object { 
             $_.FullName -match '\\bin\\(x64\\)?Release\\' 
         } | ForEach-Object {
-            # Capture parent directory name to prevent naming conflicts (e.g. separate tools named 'Program.exe')
+            # Safely capture subfolder name context to cleanly map target outputs without collision
             $parentFolder = $_.Directory.Parent.Parent.Name
             if ($_.Directory.Name -eq "x64") { $parentFolder = $_.Directory.Parent.Parent.Parent.Name }
+            
+            # Special sub-nesting resolution for Misc utilities
+            if ($_.FullName -match '\\Misc\\') {
+                $parentFolder = "Misc\$parentFolder"
+            }
             
             $targetDir = ".\StagedBinaries\$parentFolder"
             New-Item -ItemType Directory -Force -Path $targetDir
