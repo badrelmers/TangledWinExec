@@ -45,6 +45,9 @@ jobs:
     - name: Build PPIDSpoofing
       run: msbuild .\PPIDSpoofing\PPIDSpoofing.sln /p:Configuration=Release /p:Platform="Any CPU" /m
 
+    - name: Build ProcessDoppelgaenging
+      run: msbuild .\ProcessDoppelgaenging\ProcessDoppelgaenging.sln /p:Configuration=Release /p:Platform="Any CPU" /m
+
     - name: Build ProcMemScan
       run: msbuild .\ProcMemScan\ProcMemScan.sln /p:Configuration=Release /p:Platform="Any CPU" /m
 
@@ -57,9 +60,6 @@ jobs:
 
     - name: Build DarkLoadLibrary
       run: msbuild .\DarkLoadLibrary\DarkLoadLibrary.sln /p:Configuration=Release /p:Platform=x64 /m
-
-    - name: Build ProcessDoppelgaenging
-      run: msbuild .\ProcessDoppelgaenging\ProcessDoppelgaenging.sln /p:Configuration=Release /p:Platform=x64 /m
 
     - name: Build ProcessGhosting
       run: msbuild .\ProcessGhosting\ProcessGhosting.sln /p:Configuration=Release /p:Platform=x64 /m
