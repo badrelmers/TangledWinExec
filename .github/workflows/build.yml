@@ -36,8 +36,11 @@ jobs:
     - name: Build ProcMemScan
       run: msbuild .\ProcMemScan\ProcMemScan.sln /p:Configuration=Release /p:Platform="Any CPU" /m
 
-    - name: Build ProtectedProcess
-      run: msbuild .\ProtectedProcess\ProtectedProcess.sln /p:Configuration=Release /p:Platform="Any CPU" /m
+    - name: Build ProtectedProcess - PPEditor
+      run: msbuild .\ProtectedProcess\PPEditor\PPEditor.sln /p:Configuration=Release /p:Platform="Any CPU" /m
+
+    - name: Build ProtectedProcess - SdDumper
+      run: msbuild .\ProtectedProcess\SdDumper\SdDumper.sln /p:Configuration=Release /p:Platform="Any CPU" /m
 
     # =========================================================
     # Native / Specific Architecture Solutions (Use x64)
