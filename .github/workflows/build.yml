@@ -87,3 +87,34 @@ jobs:
 
     - name: Build ProtectedProcess - PPEditor
       run: msbuild .\ProtectedProcess\PPEditor\PPEditor.sln /p:Configuration=Release /p:Platform=x64 /m
+
+    # =========================================================
+    # Gather and Stage Compiled Artifacts
+    # =========================================================
+
+    - name: Stage Artifacts for Zipping
+      run: |
+        # Create a clean folder to stage everything
+        New-Item -ItemType Directory -Force -Path .\StagedBinaries
+        
+        # Find all .exe and .dll files recursively within Release output folders
+        Get-ChildItem -Recurse -Include *.exe, *.dll | Where-Object { 
+            $_.FullName -match '\\bin\\(x64\\)?Release\\' 
+        } | ForEach-Object {
+            # Capture parent directory name to prevent naming conflicts (e.g. separate tools named 'Program.exe')
+            $parentFolder = $_.Directory.Parent.Parent.Name
+            if ($_.Directory.Name -eq "x64") { $parentFolder = $_.Directory.Parent.Parent.Parent.Name }
+            
+            $targetDir = ".\StagedBinaries\$parentFolder"
+            New-Item -ItemType Directory -Force -Path $targetDir
+            
+            Write-Host "Staging binary: $($_.FullName) -> $targetDir"
+            Copy-Item -Path $_.FullName -Destination $targetDir -Force
+        }
+
+    - name: Upload Build Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: TangledWinExec-Binaries
+        path: .\StagedBinaries\
+        retention-days: 7
