@@ -12,6 +12,14 @@ jobs:
     runs-on: windows-2022
 
     steps:
+    - name: Build all solutions in Misc
+      run: |
+        Get-ChildItem -Path .\Misc -Filter *.sln -Recurse | ForEach-Object {
+            Write-Host "------------------------------------------------------"
+            Write-Host "Building Solution: $($_.FullName)"
+            Write-Host "------------------------------------------------------"
+            & msbuild.exe $_.FullName /p:Configuration=Release /m
+        }
     - name: Checkout Repository
       uses: actions/checkout@v4
 
