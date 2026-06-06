@@ -36,14 +36,8 @@ jobs:
     - name: Build ProcMemScan
       run: msbuild .\ProcMemScan\ProcMemScan.sln /p:Configuration=Release /p:Platform="Any CPU" /m
 
-    - name: Build ProtectedProcess - PPEditor
-      run: msbuild .\ProtectedProcess\PPEditor\PPEditor.sln /p:Configuration=Release /p:Platform="Any CPU" /m
-
-    - name: Build ProtectedProcess - SdDumper
-      run: msbuild .\ProtectedProcess\SdDumper\SdDumper.sln /p:Configuration=Release /p:Platform="Any CPU" /m
-
     # =========================================================
-    # Native / Specific Architecture Solutions (Use x64)
+    # Native & Specific Architecture Solutions (Use x64)
     # =========================================================
 
     - name: Build BlockingDLL
@@ -75,6 +69,12 @@ jobs:
 
     - name: Build ProcessHollowing
       run: msbuild .\ProcessHollowing\ProcessHollowing.sln /p:Configuration=Release /p:Platform=x64 /m
+
+    - name: Build ProtectedProcess - PPEditor
+      run: msbuild .\ProtectedProcess\PPEditor\PPEditor.sln /p:Configuration=Release /p:Platform=x64 /m
+
+    - name: Build ProtectedProcess - SdDumper
+      run: msbuild .\ProtectedProcess\SdDumper\SdDumper.sln /p:Configuration=Release /p:Platform=x64 /m
 
     - name: Build ReflectiveDLLInjection
       run: msbuild .\ReflectiveDLLInjection\ReflectiveDLLInjection.sln /p:Configuration=Release /p:Platform=x64 /m
