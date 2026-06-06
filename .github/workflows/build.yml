@@ -157,12 +157,12 @@ jobs:
         }
 
         Write-Host "======================================================"
-        Write-Host "Purging C++ compiler intermediate leftovers & tracker logs..."
+        Write-Host "Purging C++ compiler intermediate leftovers & linker residue..."
         Write-Host "======================================================"
         
-        # Target and delete specific MSVC compilation artifacts
+        # Target and delete specific MSVC compilation artifacts (added .lib and .exp)
         Get-ChildItem -Path .\StagedBinaries -Recurse -File | Where-Object {
-            $_.Extension -in '.pdb', '.ilk', '.recipe', '.iobj', '.ipdb', '.pch', '.obj'
+            $_.Extension -in '.pdb', '.ilk', '.recipe', '.iobj', '.ipdb', '.pch', '.obj', '.lib', '.exp'
         } | ForEach-Object {
             Write-Host "Removing intermediate file: $($_.FullName)"
             Remove-Item -Path $_.FullName -Force
