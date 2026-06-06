@@ -107,10 +107,10 @@ jobs:
 
     - name: Stage Content and Purge Build Clutter
       run: |
-        # Create staging root directory
+        # 1. Create staging root directory
         New-Item -ItemType Directory -Force -Path .\StagedBinaries
         
-        # Locate all active build output folders named 'Release' (ignoring intermediate 'obj' workspaces)
+        # 2. Locate all active build output folders named 'Release' (ignoring intermediate 'obj' workspaces)
         Get-ChildItem -Recurse -Directory | Where-Object { 
             $_.Name -eq "Release" -and $_.FullName -notmatch '\\obj\\' 
         } | ForEach-Object {
@@ -128,18 +128,52 @@ jobs:
             $targetDir = ".\StagedBinaries\$cleanName"
             New-Item -ItemType Directory -Force -Path $targetDir
             
-            Write-Host "Staging entire output directory: $($_.FullName) -> $targetDir"
+            Write-Host "Staging build directory: $($_.FullName) -> $targetDir"
             Copy-Item -Path "$($_.FullName)\*" -Destination $targetDir -Recurse -Force
         }
         
+        # 3. Explicitly copy the uncompiled PEUtils tool directory
+        if (Test-Path ".\Misc\PEUtils") {
+            Write-Host "Staging static utility folder: Misc\PEUtils"
+            $targetPEUtils = ".\StagedBinaries\Misc\PEUtils"
+            New-Item -ItemType Directory -Force -Path $targetPEUtils
+            Copy-Item -Path ".\Misc\PEUtils\*" -Destination $targetPEUtils -Recurse -Force
+        }
+        
+        # 4. Find and mirror any documentation / README files from the source directories
+        Get-ChildItem -Recurse -Filter "README*" | Where-Object {
+            $_.FullName -notmatch '\\StagedBinaries\\' -and $_.FullName -notmatch '\\obj\\' -and $_.FullName -notmatch '\\bin\\'
+        } | ForEach-Object {
+            $relativeDir = Resolve-Path -Relative $_.FullName
+            $cleanPath = $relativeDir -replace '^\.\\', ''
+            $targetFile = ".\StagedBinaries\$cleanPath"
+            $targetDir = Split-Path $targetFile -Parent
+            
+            if (!(Test-Path $targetDir)) {
+                New-Item -ItemType Directory -Force -Path $targetDir
+            }
+            Write-Host "Mirroring documentation: $cleanPath"
+            Copy-Item -Path $_.FullName -Destination $targetFile -Force
+        }
+
         Write-Host "======================================================"
-        Write-Host "Purging debug symbols and compilation residue..."
+        Write-Host "Purging C++ compiler intermediate leftovers & tracker logs..."
         Write-Host "======================================================"
         
-        # Target and delete pure build environment remnants (.pdb, .ilk) from the staging pool
-        Get-ChildItem -Path .\StagedBinaries -Recurse -Include *.pdb, *.ilk | ForEach-Object {
-            Write-Host "Removing leftover file: $($_.FullName)"
+        # Target and delete specific MSVC compilation artifacts
+        Get-ChildItem -Path .\StagedBinaries -Recurse -File | Where-Object {
+            $_.Extension -in '.pdb', '.ilk', '.recipe', '.iobj', '.ipdb', '.pch', '.obj'
+        } | ForEach-Object {
+            Write-Host "Removing intermediate file: $($_.FullName)"
             Remove-Item -Path $_.FullName -Force
+        }
+        
+        # Completely drop compilation tracking log directories (.tlog)
+        Get-ChildItem -Path .\StagedBinaries -Recurse -Directory | Where-Object {
+            $_.Name -like "*.tlog"
+        } | ForEach-Object {
+            Write-Host "Dropping log folder: $($_.FullName)"
+            Remove-Item -Path $_.FullName -Recurse -Force
         }
 
     - name: Upload Complete Artifact Package
