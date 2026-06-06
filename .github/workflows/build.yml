@@ -39,6 +39,9 @@ jobs:
     - name: Build GhostlyHollowing
       run: msbuild .\GhostlyHollowing\GhostlyHollowing.sln /p:Configuration=Release /p:Platform="Any CPU" /m
 
+    - name: Build PhantomDllHollower
+      run: msbuild .\PhantomDllHollower\PhantomDllHollower.sln /p:Configuration=Release /p:Platform="Any CPU" /m
+
     - name: Build ProcMemScan
       run: msbuild .\ProcMemScan\ProcMemScan.sln /p:Configuration=Release /p:Platform="Any CPU" /m
 
@@ -51,9 +54,6 @@ jobs:
 
     - name: Build DarkLoadLibrary
       run: msbuild .\DarkLoadLibrary\DarkLoadLibrary.sln /p:Configuration=Release /p:Platform=x64 /m
-
-    - name: Build PhantomDllHollower
-      run: msbuild .\PhantomDllHollower\PhantomDllHollower.sln /p:Configuration=Release /p:Platform=x64 /m
 
     - name: Build PPIDSpoofing
       run: msbuild .\PPIDSpoofing\PPIDSpoofing.sln /p:Configuration=Release /p:Platform=x64 /m
