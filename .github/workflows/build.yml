@@ -102,35 +102,47 @@ jobs:
         }
 
     # =========================================================
-    # Gather and Stage Compiled Artifacts
+    # Gather, Purge Leftovers, and Stage Artifacts
     # =========================================================
 
-    - name: Stage Artifacts for Zipping
+    - name: Stage Content and Purge Build Clutter
       run: |
-        # Create staging root
+        # Create staging root directory
         New-Item -ItemType Directory -Force -Path .\StagedBinaries
         
-        # Gather matching compiled .exe and .dll items out of Release outputs
-        Get-ChildItem -Recurse -Include *.exe, *.dll | Where-Object { 
-            $_.FullName -match '\\bin\\(x64\\)?Release\\' 
+        # Locate all active build output folders named 'Release' (ignoring intermediate 'obj' workspaces)
+        Get-ChildItem -Recurse -Directory | Where-Object { 
+            $_.Name -eq "Release" -and $_.FullName -notmatch '\\obj\\' 
         } | ForEach-Object {
-            # Safely capture subfolder name context to cleanly map target outputs without collision
-            $parentFolder = $_.Directory.Parent.Parent.Name
-            if ($_.Directory.Name -eq "x64") { $parentFolder = $_.Directory.Parent.Parent.Parent.Name }
             
-            # Special sub-nesting resolution for Misc utilities
-            if ($_.FullName -match '\\Misc\\') {
-                $parentFolder = "Misc\$parentFolder"
-            }
+            # Obtain repository relative pathway structure
+            $relative = Resolve-Path -Relative $_.FullName
+            $cleanName = $relative -replace '^\.\\', ''
             
-            $targetDir = ".\StagedBinaries\$parentFolder"
+            # Strip standard build environment sub-paths to isolate clean module root identifiers
+            $cleanName = $cleanName -replace '\\bin\\Release$', ''
+            $cleanName = $cleanName -replace '\\bin\\x64\\Release$', ''
+            $cleanName = $cleanName -replace '\\x64\\Release$', ''
+            $cleanName = $cleanName -replace '\\Release$', ''
+            
+            $targetDir = ".\StagedBinaries\$cleanName"
             New-Item -ItemType Directory -Force -Path $targetDir
             
-            Write-Host "Staging binary: $($_.FullName) -> $targetDir"
-            Copy-Item -Path $_.FullName -Destination $targetDir -Force
+            Write-Host "Staging entire output directory: $($_.FullName) -> $targetDir"
+            Copy-Item -Path "$($_.FullName)\*" -Destination $targetDir -Recurse -Force
+        }
+        
+        Write-Host "======================================================"
+        Write-Host "Purging debug symbols and compilation residue..."
+        Write-Host "======================================================"
+        
+        # Target and delete pure build environment remnants (.pdb, .ilk) from the staging pool
+        Get-ChildItem -Path .\StagedBinaries -Recurse -Include *.pdb, *.ilk | ForEach-Object {
+            Write-Host "Removing leftover file: $($_.FullName)"
+            Remove-Item -Path $_.FullName -Force
         }
 
-    - name: Upload Build Artifacts
+    - name: Upload Complete Artifact Package
       uses: actions/upload-artifact@v4
       with:
         name: TangledWinExec-Binaries
